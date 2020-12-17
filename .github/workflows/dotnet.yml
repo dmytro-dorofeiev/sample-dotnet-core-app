@@ -7,9 +7,7 @@ on:
     branches: [ master ]
 env:
   buildConfiguration: 'Release' 
-  GITHUB_SHA: ${{ github.sha }}
   SERVICE_NAME: sample-dotnet-app
-  REGISTRY_HOSTNAME: ecr
   ENV: dev
 
 jobs:
@@ -37,14 +35,22 @@ jobs:
         report_name: Unit_Tests
         report_title: My Project Tests
         github_token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Docker Build and push
-      id: docker_build
-      uses: docker/build-push-action@v2
+    - name: Build an image from Dockerfile
+      run: |
+        docker build -t docker.io/my-organization/$SERVICE_NAME:${{ github.sha }} .
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
       with:
-        context: .
-        file: ./Dockerfile
-        push: false
-        tags: ${{ steps.docker_meta.outputs.tags }}
-        labels: ${{ steps.docker_meta.outputs.labels }}
+        image-ref: 'docker.io/my-organization/$SERVICE_NAME:${{ github.sha }}'
+        format: 'template'
+        template: '@/contrib/sarif.tpl'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
     
     
