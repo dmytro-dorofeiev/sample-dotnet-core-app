@@ -23,19 +23,21 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.103
-    - name: Build
+    - name: Build code
       run: |
           dotnet build --configuration $buildConfiguration
+    - name: Test code
+      run: |
           dotnet test dotnetcore-tests --configuration $buildConfiguration --logger trx
           dotnet publish --configuration $buildConfiguration --output out
-    - name: Test Report
+    - name: Publish Test Report
       uses: zyborg/dotnet-tests-report@v1.0.0
       with:
         project_path: "**/*.trx"
         report_name: Unit_Tests
         report_title: My Project Tests
         github_token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build and push
+    - name: Docker Build and push
       id: docker_build
       uses: docker/build-push-action@v2
       with:
