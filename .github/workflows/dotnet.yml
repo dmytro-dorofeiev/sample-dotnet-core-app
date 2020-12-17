@@ -5,6 +5,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+env:
+  buildConfiguration: 'Release' 
 
 jobs:
   build:
@@ -16,12 +18,18 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.301
-    - name: Restore dependencies
-      run: dotnet restore
+        dotnet-version: 2.0
     - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: |
+          dotnet build --configuration $buildConfiguration
+          dotnet test dotnetcore-tests --configuration $buildConfiguration --logger trx
+          dotnet publish --configuration $buildConfiguration --output out
+    - name: Test Report
+      uses: zyborg/dotnet-tests-report@v1.0.0
+      with:
+        project_path: "**/*.trx"
+        report_name: my_project_tests
+        report_title: My Project Tests
+        github_token: ${{ secrets.GITHUB_TOKEN }}
     
     
