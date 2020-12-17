@@ -7,6 +7,10 @@ on:
     branches: [ master ]
 env:
   buildConfiguration: 'Release' 
+  GITHUB_SHA: ${{ github.sha }}
+  SERVICE_NAME: sample-dotnet-app
+  REGISTRY_HOSTNAME: ecr
+  ENV: dev
 
 jobs:
   build:
@@ -23,14 +27,23 @@ jobs:
       run: |
           dotnet build --configuration $buildConfiguration
           dotnet add package JUnitTestLogger --version 1.1.0
-          dotnet test dotnetcore-tests  --logger "junit;LogFilePath=TestResults/results.xml"
+          dotnet test dotnetcore-tests --configuration $(buildConfiguration) --logger trx
           dotnet publish --configuration $buildConfiguration --output out
     - name: Test Report
       uses: zyborg/dotnet-tests-report@v1.0.0
       with:
-        project_path: "**/*.xml"
+        project_path: "**/*.trx"
         report_name: Unit_Tests
         report_title: My Project Tests
         github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Docker Build
+      run: |
+        DOCKER_BUILDKIT=1 docker build \
+          --build-arg BUILDKIT_INLINE_CACHE=1 \
+          --cache-from $REGISTRY_HOSTNAME/$SERVICE_NAME:$ENV-latest \
+          -t $REGISTRY_HOSTNAME/$SERVICE_NAME:$ENV-$GITHUB_SHA \
+          -t $REGISTRY_HOSTNAME/$SERVICE_NAME:$ENV-latest \
+          -t $REGISTRY_HOSTNAME/$SERVICE_NAME:$ENV-$GITHUB_RUN_NUMBER \
+          .
     
     
