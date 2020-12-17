@@ -22,14 +22,14 @@ jobs:
     - name: Build
       run: |
           dotnet build --configuration $buildConfiguration
-          dotnet test dotnetcore-tests --configuration $buildConfiguration --logger GitHubActions
+          dotnet test dotnetcore-tests /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
           dotnet publish --configuration $buildConfiguration --output out
-#     - name: Test Report
-#       uses: zyborg/dotnet-tests-report@v1.0.0
-#       with:
-#         project_path: "**/TestResults/*.trx"
-#         report_name: Unit_Tests
-#         report_title: My Project Tests
-#         github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Test Report
+      uses: zyborg/dotnet-tests-report@v1.0.0
+      with:
+        project_path: "**/*.xml"
+        report_name: Unit_Tests
+        report_title: My Project Tests
+        github_token: ${{ secrets.GITHUB_TOKEN }}
     
     
