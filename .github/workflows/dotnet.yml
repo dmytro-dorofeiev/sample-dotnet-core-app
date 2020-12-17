@@ -27,8 +27,8 @@ jobs:
     - name: Test Report
       uses: zyborg/dotnet-tests-report@v1.0.0
       with:
-        project_path: "dotnetcore-tests/TestResults/*.trx"
-        report_name: my_project_tests
+        project_path: "**/TestResults/*.trx"
+        report_name: Unit_Tests
         report_title: My Project Tests
         github_token: ${{ secrets.GITHUB_TOKEN }}
     
