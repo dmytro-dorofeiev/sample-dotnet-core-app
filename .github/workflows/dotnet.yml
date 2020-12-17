@@ -26,7 +26,7 @@ jobs:
     - name: Build
       run: |
           dotnet build --configuration $buildConfiguration
-          dotnet test dotnetcore-tests --configuration $(buildConfiguration) --logger trx
+          dotnet test dotnetcore-tests --configuration $buildConfiguration --logger trx
           dotnet publish --configuration $buildConfiguration --output out
     - name: Test Report
       uses: zyborg/dotnet-tests-report@v1.0.0
@@ -35,14 +35,14 @@ jobs:
         report_name: Unit_Tests
         report_title: My Project Tests
         github_token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Docker Build
-      run: |
-        DOCKER_BUILDKIT=1 docker build \
-          --build-arg BUILDKIT_INLINE_CACHE=1 \
-          --cache-from $REGISTRY_HOSTNAME/$SERVICE_NAME:$ENV-latest \
-          -t $REGISTRY_HOSTNAME/$SERVICE_NAME:$ENV-$GITHUB_SHA \
-          -t $REGISTRY_HOSTNAME/$SERVICE_NAME:$ENV-latest \
-          -t $REGISTRY_HOSTNAME/$SERVICE_NAME:$ENV-$GITHUB_RUN_NUMBER \
-          .
+    - name: Build and push
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: false
+        tags: ${{ steps.docker_meta.outputs.tags }}
+        labels: ${{ steps.docker_meta.outputs.labels }}
     
     
