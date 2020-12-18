@@ -26,7 +26,8 @@ jobs:
           dotnet build --configuration $buildConfiguration
     - name: Test code
       run: |
-          dotnet test dotnetcore-tests --configuration $buildConfiguration --logger trx
+          dotnet add package JunitXml.TestLogger --version 2.1.78
+          dotnet test dotnetcore-tests --configuration $buildConfiguration --test-adapter-path:. --logger:junit
           dotnet publish --configuration $buildConfiguration --output out
     - name: Publish Test Report
       uses: zyborg/dotnet-tests-report@v1.0.0
