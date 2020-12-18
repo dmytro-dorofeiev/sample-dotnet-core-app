@@ -26,7 +26,7 @@ jobs:
           dotnet build --configuration $buildConfiguration
     - name: Test code
       run: |
-          dotnet add package JunitXml.TestLogger --version 2.1.78
+          dotnet add dotnetcore-tests package JunitXml.TestLogger --version 2.1.78
           dotnet test dotnetcore-tests --configuration $buildConfiguration --test-adapter-path:. --logger:junit
           dotnet publish --configuration $buildConfiguration --output out
     - name: Publish Test Report
