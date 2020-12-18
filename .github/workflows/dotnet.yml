@@ -29,14 +29,19 @@ jobs:
           dotnet add dotnetcore-tests package JunitXml.TestLogger --version 2.1.78
           dotnet test dotnetcore-tests --configuration $buildConfiguration --test-adapter-path:. --logger:junit
           dotnet publish --configuration $buildConfiguration --output out
-    - name: Publish Test Report
-      uses: zyborg/dotnet-tests-report@v1.0.0
+#     - name: Publish Test Report
+#       uses: zyborg/dotnet-tests-report@v1.0.0
+#       with:
+#         project_path: "dotnetcore-tests/TestResults/*.xml"
+#         report_name: Unit_Tests
+#         report_title: My Project Tests
+#         github_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1.6
+      if: always()
       with:
-        project_path: "dotnetcore-tests/TestResults/*.xml"
-        report_name: Unit_Tests
-        report_title: My Project Tests
         github_token: ${{ secrets.GITHUB_TOKEN }}
-
+        files: dotnetcore-tests/**/*.xml
 #     - name: Build an image from Dockerfile
 #       run: |
 #         docker build -t docker.io/my-organization/${{ env.SERVICE_NAME }}:${{ github.sha }} .
